@@ -1,0 +1,91 @@
+version: '3.1'
+
+x-template: &app-template
+  restart: unless-stopped
+  environment:
+    ConnectionStrings__DefaultConnection: Server=${databaseServer};Database=${databaseName};User ID=${databaseUsername};Password=${databasePassword};Encrypt=true;TrustServerCertificate=true
+    authority__url: ${authorityUrl}
+    authority__dynamic: ${authorityDynamic:-false}
+    mqtt__Host: ${mqttHost:-flex-mqtt}
+    mqtt__Transport: ${mqttTransport:-Tcp}
+    mqtt__Port: ${mqttPort:-1883}
+    mqtt__ExternalServer: ${mqttExternalServer:-false}
+    mqtt__Username: ${mqttUsername}
+    mqtt__Password: ${mqttPassword}
+    SmartInspect__Level: ${logLevel:-Message}
+  networks:
+    - default
+  volumes:
+    # Optional Directory mappings used by Flex
+    # Photos and Templates are all that really need to be set
+    - /var/lib/docker/volumes/flex/cache:/flex/cache
+    - /var/lib/docker/volumes/flex/config:/flex/config
+    - /var/lib/docker/volumes/flex/scripts:/flex/scripts
+    - /var/lib/docker/volumes/flex/logs:/flex/logs
+    - /var/lib/docker/volumes/flex/template:/flex/templates
+    - /var/lib/docker/volumes/flex/photos:/flex/photos
+    - /var/lib/docker/volumes/flex/reports:/flex/reports
+
+# Example on how to bind to a Windows share
+#volumes:
+#  photoShare:
+#    driver_opts:
+#      type: cifs
+#      device: "//192.168.25.44/dnaFusion/Photos"
+#      o: "username=OOUser,password=OpenOptions"
+# volumes would then look like:
+# - photoShare:/flex/photos
+
+services:
+
+  mqtt:
+    <<: *app-template
+    image: docker.ooaccess.info/flex/mqtt:${MQTT_VERSION:-latest}
+    container_name: flex-mqtt
+    hostname: flex-mqtt
+    ports:
+      - ${BIND_IP:-0.0.0.0}:1883:1883
+
+  proxy:
+    <<: *app-template
+    image: docker.ooaccess.info/flex/proxy:${PROXY_VERSION:-latest}
+    container_name: flex-proxy
+    hostname: flex-proxy
+    # You can expose the web port here when not using the Flex Tunnel
+    # ports:
+    #   - ${BIND_IP:-0.0.0.0}:80:80
+
+  api:
+    <<: *app-template
+    image: docker.ooaccess.info/flex/api/v2:${API_VERSION:-latest}
+    container_name: flex-api
+    hostname: flex-api
+    depends_on:
+      - mqtt
+
+  identity:
+    <<: *app-template
+    image: docker.ooaccess.info/flex/identity:${IDENTITY_VERSION:-latest}
+    container_name: flex-identity
+    hostname: flex-identity
+    depends_on:
+      - mqtt
+
+  reports:
+    <<: *app-template
+    image: docker.ooaccess.info/flex/reports:${REPORTS_VERSION:-latest}
+    container_name: flex-reports
+    hostname: flex-reports
+
+  tunnel:
+    <<: *app-template
+    image: docker.ooaccess.info/flex/tunnel:${TUNNEL_VERSION:-latest}
+    container_name: flex-tunnel
+    hostname: flex-tunnel
+    depends_on:
+      - mqtt
+
+networks:
+  default:
+    name: flex_default
+    driver: bridge
