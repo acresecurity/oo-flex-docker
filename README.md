@@ -27,11 +27,11 @@ code .env
 # Hostname or IP address of the database server, can include the instance name as well.
 #   myServerAddress
 #   myServerAddress\myInstanceName
-databaseServer=""
+databaseServer=
 # SQL database name 
-databaseName=""
+databaseName=
 # SQL authentication username
-databaseUsername=""
+databaseUsername=
 # SQL authentication password
-databasePassword=""
+databasePassword=
 ```
