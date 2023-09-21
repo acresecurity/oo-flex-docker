@@ -3,15 +3,16 @@ version: '3.1'
 x-template: &app-template
   restart: unless-stopped
   environment:
-    ConnectionStrings__DefaultConnection: Server=${databaseServer};Database=${databaseName};User ID=${databaseUsername};Password=${databasePassword};Encrypt=true;TrustServerCertificate=true
-    authority__url: ${authorityUrl}
+    # Any environment variables that are set will override any defaults in the *.settings.json files, including blank/empty values
+    ConnectionStrings__DefaultConnection: Server=${databaseServer};Database=${databaseName};User ID=${databaseUsername};Password=${databasePassword};Encrypt=${sqlEncrypt:-true};TrustServerCertificate=${sqlTrustServerCertificate:-false};
+    authority__url: ${authorityUrl:-}
     authority__dynamic: ${authorityDynamic:-false}
     mqtt__Host: ${mqttHost:-flex-mqtt}
     mqtt__Transport: ${mqttTransport:-Tcp}
     mqtt__Port: ${mqttPort:-1883}
     mqtt__ExternalServer: ${mqttExternalServer:-false}
-    mqtt__Username: ${mqttUsername}
-    mqtt__Password: ${mqttPassword}
+    mqtt__Username: ${mqttUsername:-}
+    mqtt__Password: ${mqttPassword:-}
     SmartInspect__Level: ${logLevel:-Message}
   networks:
     - default
