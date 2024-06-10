@@ -2,8 +2,8 @@
 
 ## Getting Started
 
-1. Clone this repo `git clone https://bitbucket.org/ooaccess/flex-docker.git`
-2. Change directory to the repo `cd flex-docker`
+1. Clone this repo `git clone https://github.com/acresecurity/oo-flex-docker.git`
+2. Change directory to the repo `cd oo-flex-docker`
 3. Edit `.env` file.
 4. Run `docker-compose up -d`
 
